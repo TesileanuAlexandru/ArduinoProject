@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1634941299 source:c:\users\alexandru_tesileanu\desktop\arduino\arduinoproject\steppermotorlib\parallelrunningsteppermotor.cpp
+	"ParallelStepperMotor.h"
+
+1634942054 c:\users\alexandru_tesileanu\desktop\arduino\arduinoproject\steppermotorlib\parallelsteppermotor.h
+	<list>
+	<iterator>
+	<Stepper.h>
+
+1634941372 source:c:\users\alexandru_tesileanu\desktop\arduino\arduinoproject\steppermotorlib\main.cpp
+	<iostream>
+	"ParallelStepperMotor.h"
+	<list>
+
