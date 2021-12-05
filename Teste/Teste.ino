@@ -1,12 +1,13 @@
-#include <Stepper.h>
-//#include <ParallelStepperMotor.h>
 
-const float STEPS_PER_REV = 42;
-const float GEAR_RED = 64;
-const float STEPS_PER_OUT_REV = STEPS_PER_REV * GEAR_RED;
-int StepsRequired;
-int dir = 12;
-Stepper steppermotor1(STEPS_PER_REV,3,4);
+#include <Stepper.h>
+
+class ExtendedStepper{
+  private:
+    int postion;
+  public:
+    Stepper stepper;
+    ExtendedStepper(float stepsPerRev, int pin, int pin2):stepper(stepsPerRev, pin, pin2){};  
+};
 int stepsToDo = 15000;
 
 unsigned long previousMotor1Time = millis();
@@ -14,6 +15,18 @@ long Motor1Interval = 1;
 
 unsigned long previousMotor2Time = millis();
 long Motor2Interval = 10;
+
+const float STEPS_PER_REV = 42;
+const float GEAR_RED = 64;
+const float STEPS_PER_OUT_REV = STEPS_PER_REV * GEAR_RED;
+int StepsRequired;
+int dir = 12;
+
+
+
+ExtendedStepper motor(STEPS_PER_REV,3,4);
+//motor.setStepper(steppermotor1);
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -23,25 +36,19 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+    // put your main code here, to run repeatedly:
   if (digitalRead(2) == HIGH) {
   digitalWrite(12,LOW);
   } 
   else {
     digitalWrite(12,LOW);
   }
-  steppermotor1.setSpeed(4000);
+  motor.stepper.setSpeed(4000);
   unsigned long currentMotor1Time = millis();
-  unsigned long currentMotor2Time = millis();
-  if(currentMotor2Time - previousMotor2Time > Motor2Interval){
-    // Spin Motor2
-    previousMotor2Time = currentMotor2Time;
-  }
   
   if( (currentMotor1Time - previousMotor1Time > Motor1Interval) && stepsToDo > 0){
-    steppermotor1.step(5);
+    motor.stepper.step(5);
     previousMotor1Time = currentMotor1Time;
     stepsToDo -= 5;
   }
-  
 }

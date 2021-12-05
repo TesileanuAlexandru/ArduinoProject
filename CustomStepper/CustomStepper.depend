@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1638741613 source:c:\users\alexandru_tesileanu\onedrive - dell technologies\desktop\arduino\arduinoproject\customstepper\customstepper.cpp
+	"CustomStepper.h"
+
+1638741658 c:\users\alexandru_tesileanu\onedrive - dell technologies\desktop\arduino\arduinoproject\customstepper\customstepper.h
+
+1638741637 source:c:\users\alexandru_tesileanu\onedrive - dell technologies\desktop\arduino\arduinoproject\customstepper\main.cpp
+	<iostream>
+	"CustomStepper.h"
+
