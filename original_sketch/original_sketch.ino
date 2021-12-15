@@ -30,7 +30,7 @@ pinMode(2,INPUT);
 pinMode(12,OUTPUT);
 
 }
-
+int x=0;
 void loop() {
 
   if (digitalRead(2) == HIGH) {
@@ -43,48 +43,17 @@ else {
 }
 
   
- steppermotor1.setSpeed(3000);
+ 
  StepsRequired = 1900;
- steppermotor1.step(StepsRequired); 
+ steppermotor1.setSpeed(3000);
+  steppermotor1.step(-1900); 
+
+ x = x + 1;
  delay(500) ;
+ digitalWrite(12,HIGH);
+ steppermotor1.step(1900); 
 
  
-
- steppermotor2.setSpeed(2600);
- StepsRequired = 2000;
- steppermotor2.step(StepsRequired); 
- delay(500) ;
-
-   
- 
-
- steppermotor3.setSpeed(2600);
- StepsRequired = 5000;
- steppermotor3.step(StepsRequired); 
- delay(50) ;
- 
- steppermotor4.setSpeed(4000);
- StepsRequired = 2400;
- steppermotor4.step(StepsRequired); 
- delay(20) ;
-
- steppermotor5.setSpeed(5600);
- StepsRequired = 2000;
- steppermotor5.step(StepsRequired); 
- delay(10) ;
-
-   
- 
-
- steppermotor6.setSpeed(8600);
- StepsRequired = 1000;
- steppermotor6.step(StepsRequired); 
- delay(50) ;
- 
- steppermotor7.setSpeed(4000);
- StepsRequired = 2400;
- steppermotor7.step(StepsRequired); 
- delay(20) ;
 
 digitalWrite(12,HIGH);
  delay (100);

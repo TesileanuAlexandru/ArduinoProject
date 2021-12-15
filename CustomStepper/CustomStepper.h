@@ -9,7 +9,7 @@ using namespace std;
 class ExtendedStepper{
 private:
     Stepper stepper;
-    int position;
+    int postion;
 
 public:
     void voidSetHome();
