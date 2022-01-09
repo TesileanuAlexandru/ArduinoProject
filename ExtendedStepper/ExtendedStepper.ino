@@ -3,7 +3,6 @@
 // Prin coventie, pin12 & High = inainte
 
 class ExtendedStepper{
-  
   private:
     Stepper stepper;
     int position;
@@ -74,11 +73,31 @@ class ExtendedStepper{
       this->position = pos;
     }
 
-    
-    
-   
-  
 };
+
+void runTwoSteppersInParallel(ExtendedStepper& motorOne, int motorOneStepsReq, int motorOneStepsPerTimeInterval, long motorOneInterval,
+                              ExtendedStepper& motorTwo, int motorTwoStepsReq, int motorTwoStepsPerTimeInterval, long motorTwoInterval){
+                                // Pentru moment, e de preferat ca numarul de pasi necesar sa se divida la numarul de pasi per interval de timp
+                             
+  unsigned long previousMotorOneTime = millis();  
+  unsigned long previousMotorTwoTime = millis();
+  unsigned long curentMotorOneTime;
+  unsigned long curentMotorTwoTime;
+  while(motorOneStepsReq != 0 && motorTwoStepsReq != 0){
+    curentMotorOneTime = millis();
+    if(motorOneStepsReq != 0 && (curentMotorOneTime - previousMotorOneTime > motorOneInterval)){
+      motorOne.step(motorOneStepsPerTimeInterval);
+      previousMotorOneTime = curentMotorOneTime;
+      motorOneStepsReq -= motorOneStepsPerTimeInterval;
+    }
+    curentMotorTwoTime = millis();
+    if(motorTwoStepsReq != 0 && (curentMotorTwoTime - previousMotorTwoTime > motorTwoInterval)){
+      motorTwo.step(motorTwoStepsPerTimeInterval);
+      previousMotorTwoTime = curentMotorTwoTime;
+      motorTwoStepsReq -= motorTwoStepsPerTimeInterval;
+    }
+  }
+}
 
 
 
