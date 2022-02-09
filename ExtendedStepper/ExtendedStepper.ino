@@ -46,8 +46,9 @@ class ExtendedStepper{
     void setHome(int steps){
       bool sensor = false;
       int x = 100; // 
+      this.step(-5 * steps);
       while(sensor == false){
-        step(steps);
+        this.step(steps);
         //Citeste din nou valoarea senzorului (Urmatoarele linii se vor sterge)
         x--;
         if(x == 0){
@@ -113,6 +114,9 @@ ExtendedStepper motor(STEPS_PER_REV, 3, 4, 12, 4000);
 void setup() {
   pinMode(2,INPUT);
   pinMode(12,OUTPUT);
+
+  // Trimite motoarele la pozitia de home
+  
 /*
   motor.step(2000);
   delay(500);
