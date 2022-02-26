@@ -22,6 +22,7 @@ public:
     this->vMax = vMax;
     digitalWrite(this-> pinDir, HIGH);
     areMentenanta = false;
+    this->poz = 9999999999999;
   }
   void setVMin(int v){
     this->vMin = v;
@@ -44,6 +45,7 @@ public:
       }
       steps = (-1) * steps;
       poz -= steps;
+      Serial.println(steps);
     }
 
     int change = 2;
@@ -63,16 +65,26 @@ public:
             d += change;
       }
    }
+
+
   
-  void seteazaHome(bool sens, int nrPasi){
-    if (sens == false){
-      digitalWrite(pinDir, LOW);
-    } else{
-      digitalWrite(pinDir, HIGH);
-    }
+  void seteazaHome(bool sens, int nrPasi, int nrPasiInainte, int nrPasiIncet){
+//    if (sens == false){
+//      digitalWrite(pinDir, LOW);
+//    } else{
+//      digitalWrite(pinDir, HIGH);
+//    }
     while(digitalRead(pinHome)){
       step(nrPasi);
-      delay(2);
+      delay(5);
+    }
+
+    delay(1000);
+    step (nrPasiInainte);
+    delay(1000);
+    while(digitalRead(pinHome)){
+      step(nrPasiIncet);
+      delay(5);
     }
     poz = 0;
   }
@@ -97,25 +109,37 @@ public:
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 
+
 LiquidCrystal_I2C lcd(0x27,16,2);
 
-#define DOWN_PIN  8
-#define UP_PIN    9
-#define OK_PIN    10
+#define DOWN_PIN  4
+#define UP_PIN    5
+#define OK_PIN    6
 
-#define DIR_PIN        5
-#define STEP_PIN       4
-#define HOME_PIN       3
+#define CS_PIN         10
+#define DIR_PIN        52
+#define STEP_PIN       51
+#define HOME_PIN       53
 #define KILL_PIN       2
 
-StepperMotor motor1(DIR_PIN, STEP_PIN, HOME_PIN, 1400, 300);
+#define M2_HOME_PIN    8
+#define M2_DIR_PIN     7
+#define M2_STEP_PIN    6
 
-const int STATE_DELAY = 300;
+StepperMotor motor1(DIR_PIN, STEP_PIN, HOME_PIN, 1500, 500);
+StepperMotor motor2(M2_DIR_PIN, M2_STEP_PIN, M2_HOME_PIN, 1400, 300);
+
+const int STATE_DELAY = 100;
 int randomState = 0;
 StateMachine machine = StateMachine();
 State* S_SetPozAcasa       = machine.addState(&D_SetPozAcasa);
 State* S_TrimitAcasa       = machine.addState(&D_TrimitAcasa);
 State* S_MiscaAxe          = machine.addState(&D_MiscaAxe);
+  State* S_InapoiMiscaAxe  = machine.addState(&D_InapoiMiscaAxe);
+  State* S_MiscaAxa1       = machine.addState(&D_MiscaAxa1);
+  State* S_MiscaAxa2       = machine.addState(&D_MiscaAxa2);
+  State* S_MiscaAxa3       = machine.addState(&D_MiscaAxa3);
+  State* S_MiscaAxa4       = machine.addState(&D_MiscaAxa4);
 State* S_TrimiteMentenanta = machine.addState(&D_TrimiteMentenanta);
 State* S_StartSudare       = machine.addState(&D_StartSudare);
 State* S_ProcedeuSudare    = machine.addState(&D_ProcedeuSudare);
@@ -145,6 +169,8 @@ String I_MiscaAxe    = "Misca axe";
 String I_TrimiteMentenanta = "Trim mentenanta";
 String I_StartSudare = "Start sudare";
 String I_Resetare    = "Resetare oprire";
+String I_Inapoi      = "Inapoi";
+String I_MiscaAxa   = "Misca axa";
 
 
 
@@ -157,6 +183,7 @@ void setup() {
   pinMode(UP_PIN, INPUT_PULLUP);
   pinMode(OK_PIN, INPUT_PULLUP);
 
+  
   pinMode(DIR_PIN, OUTPUT);
   pinMode(STEP_PIN, OUTPUT);
   pinMode(HOME_PIN, INPUT_PULLUP);
@@ -172,6 +199,20 @@ void setup() {
 
   S_MiscaAxe->addTransition(&T_BUp, S_SetPozAcasa);
   S_MiscaAxe->addTransition(&T_BDown, S_TrimiteMentenanta);
+  S_MiscaAxe->addTransition(&T_BOk, S_InapoiMiscaAxe);
+    S_InapoiMiscaAxe->addTransition(&T_BOk, S_MiscaAxe);
+    S_InapoiMiscaAxe->addTransition(&T_BDown, S_MiscaAxa1);
+
+    S_MiscaAxa1->addTransition(&T_BUp, S_InapoiMiscaAxe);
+    S_MiscaAxa1->addTransition(&T_BDown, S_MiscaAxa2);
+
+    S_MiscaAxa2->addTransition(&T_BUp, S_MiscaAxa1);
+    S_MiscaAxa2->addTransition(&T_BDown, S_MiscaAxa3);
+
+    S_MiscaAxa3->addTransition(&T_BUp, S_MiscaAxa2);
+    S_MiscaAxa3->addTransition(&T_BDown, S_MiscaAxa4);
+
+    S_MiscaAxa4->addTransition(&T_BUp, S_MiscaAxa3);
 
   S_TrimiteMentenanta->addTransition(&T_BUp, S_MiscaAxe);
   S_TrimiteMentenanta->addTransition(&T_BDown, S_StartSudare);
@@ -186,7 +227,7 @@ void setup() {
 
   S_ResetKill->addTransition(&T_BOk, S_Resetare);
 
-  
+ 
 }
 
 void loop() {
@@ -207,15 +248,40 @@ void D_MiscaAxe(){
     Serial.println("Miscaaxe");
   }
 }
+void D_InapoiMiscaAxe(){
+  if(machine.executeOnce){
+    afisInfo(I_Inapoi, true, I_MiscaAxa+"1");
+  }
+}
+void D_MiscaAxa1(){
+  if(machine.executeOnce){
+    afisInfo(I_Inapoi, false, I_MiscaAxa+"1");
+  }
+}
+void D_MiscaAxa2(){
+  if(machine.executeOnce){
+    afisInfo(I_MiscaAxa+"2", true, I_MiscaAxa+"3");
+  }
+}
+void D_MiscaAxa3(){
+  if(machine.executeOnce){
+    afisInfo(I_MiscaAxa+"2", false, I_MiscaAxa+"3");
+  }
+}
+void D_MiscaAxa4(){
+  if(machine.executeOnce){
+    afisInfo(I_MiscaAxa+"4", true, "   ");
+  }
+}
 void D_TrimiteMentenanta(){
   if(machine.executeOnce){
-    afisInfo(I_MiscaAxe, false, I_TrimiteMentenanta);
+    afisInfo(I_TrimiteMentenanta, true, I_StartSudare);
   }
 }
 void D_TrimitAcasa(){
   if(machine.executeOnce){
     afisInfo("Se trimit acasa", false, "Inapoi");
-    motor1.seteazaHome(false,20);
+    motor2.seteazaHome(true,10,3000,5);
   }
 }
 void D_StartSudare(){
@@ -225,7 +291,7 @@ void D_StartSudare(){
 }
 void D_Resetare(){
   if(machine.executeOnce){
-    afisInfo(I_StartSudare, false, I_Resetare);
+    afisInfo(I_Resetare, true, "        ");
   }
 }
 void D_ResetKill(){
@@ -244,7 +310,7 @@ void D_ProcedeuSudare(){
     lcd.print("Trimite motoare ");
     lcd.setCursor(0,1);
     lcd.print("acasa");
-    motor1.seteazaHome(false,20);
+    motor1.seteazaHome(false,20,6000,5);
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Start sudare");
@@ -282,3 +348,4 @@ bool T_BOk(){
   }
   return false;
 }
+//##IOFILE#######################################################################################################################################################################################################
